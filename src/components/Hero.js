@@ -7,9 +7,9 @@ const Hero = ({ HeroImg, decoHero }) => {
 			<div className="container">
 				<div className="hero-content">
 					<div className="block-left">
-						<h1>Prêts à faire du tri dans vos placards ?</h1>
+						<h1>Ready to clean out your closet?</h1>
 						<Link className="block-left-link" to="/publish">
-							<button>Vends maintenant</button>
+							<button>Sell now</button>
 						</Link>
 					</div>
 				</div>

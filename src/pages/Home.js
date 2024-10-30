@@ -26,9 +26,7 @@ const Home = ({ title, setPage, page, sortedPrice, range }) => {
 	useEffect(() => {
 		const fetchData = async () => {
 			const response = await axios.get(
-				`https://vinted-backend-manuelf.herokuapp.com/offers?limit=${limit}&page=${page}&title=${title}&sort=${sortedPrice}&priceMin=${range.values[0]}&priceMax=${range.values[1]}`
-				// "https://vinted-backend-manuelf.herokuapp.com/offers"
-				// `http://localhost:3001/offers?limit=${limit}&page=${page}&title=${title}&sort=${sortedPrice}&priceMin=${range.values[0]}&priceMax=${range.values[1]}`
+				`http://localhost:3001/offers?limit=${limit}&page=${page}&title=${title}&sort=${sortedPrice}&priceMin=${range.values[0]}&priceMax=${range.values[1]}`
 			)
 			console.log(response.data)
 			setPageCount(Math.ceil(Number(response.data.count) / limit))
@@ -119,7 +117,7 @@ const Home = ({ title, setPage, page, sortedPrice, range }) => {
 						onPageChange={handlePageClick}
 						containerClassName={"pagination"}
 						activeClassName={"active"}
-						forcePage={page - 1} // retour à la page précédente si click sur précédent
+						forcePage={page - 1} // return to the previous page if click on previous
 					/>
 				</div>
 

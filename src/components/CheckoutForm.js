@@ -12,32 +12,25 @@ const CheckoutForm = ({ title, price }) => {
 	const handleSubmit = async (event) => {
 		try {
 			event.preventDefault()
-			// Récupérer les données bancaires rentréespar le user
+			// Get the bank card details entered by the user
 			const cardInfos = elements.getElement(CardElement)
 			// console.log("CardInfos ===> ", cardInfos)
 
-			// Demande la création d'un token via L"API Stripe
+			// Request token creation via Stripe API
 			const stripeResponse = await stripe.createToken(cardInfos, {
 				name: Cookies.get("userId"),
-				// name: "l'id de l'acheteur",
+				// name: "buyer's id",
 			})
-			// Récupérer un stripeToken
+			// Get a stripeToken
 			// console.log("stripeResponse ===> ", stripeResponse)
 			const stripeToken = stripeResponse.token.id
-			// Envoyer ce stripeToken à l'API Vinted
-			const response = await axios.post(
-				"https://vinted-backend-manuelf.herokuapp.com/payment",
-				{
-					stripeToken: stripeToken,
-					title: title,
-					amount: price,
-				}
-			)
-			// const response = await axios.post("http://localhost:3001/payment", {
-			// 	stripeToken: stripeToken,
-			// 	title: title,
-			// 	amount: price,
-			// })
+			// Send this stripeToken to the Vinted API
+
+			const response = await axios.post("http://localhost:3001/payment", {
+				stripeToken: stripeToken,
+				title: title,
+				amount: price,
+			})
 			if (response.data.status === "succeeded") {
 				setCompleted(true)
 			}
@@ -50,12 +43,12 @@ const CheckoutForm = ({ title, price }) => {
 	return (
 		<div>
 			{completed ? (
-				<p> Paiement effectué !</p>
+				<p>Payment completed!</p>
 			) : (
 				<form onSubmit={handleSubmit}>
-					{/* Input pour rentrer les numéros de CB */}
+					{/* Input for entering credit card numbers */}
 					<CardElement />
-					<button type="submit">Valider</button>
+					<button type="submit">Confirm</button>
 				</form>
 			)}
 		</div>

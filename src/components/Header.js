@@ -27,7 +27,7 @@ const Header = ({
 	console.log(pathName)
 
 	useEffect(() => {
-		// on detecte si on est sur la homePage, si oui, on affiche la barre de recherche + range select
+		// detect if we're on the homepage, if yes, display search bar + range select
 		if (location.pathname === "/") {
 			setPathName(true)
 		} else {
@@ -59,7 +59,7 @@ const Header = ({
 								/>
 
 								<input
-									placeholder="Recherche des articles"
+									placeholder="Search clothes"
 									className="searchInput"
 									type="text"
 									value={title}
@@ -73,7 +73,7 @@ const Header = ({
 
 						<div className="panel-edit-search-bottom">
 							<div className="checkbox-container-sort">
-								<label htmlFor="checkbox">Trier par prix</label>
+								<label htmlFor="checkbox">Sort by price</label>
 								<div className="check">
 									<input
 										onChange={(event) =>
@@ -132,7 +132,7 @@ const Header = ({
 											>
 												<div className="number-range">
 													<output style={{ marginTop: "30px" }} id="output">
-														{range.values[index] + "€"}
+														{range.values[index] + "Rs"}
 													</output>
 												</div>
 											</div>
@@ -153,26 +153,26 @@ const Header = ({
 								navigate("/")
 							}}
 						>
-							Se déconnecter
+							Sign Out
 						</button>
 					</>
 				) : (
 					<>
 						<Link to={`/signup`}>
 							<button className=" header-button button-login-signup">
-								S'incrire
+								Sign Up
 							</button>
 						</Link>
 						<Link to={`/login`}>
 							<button className="header-button button-login-signup">
-								Se connecter
+								Sign In
 							</button>
 						</Link>
 					</>
 				)}
 				<Link to="/publish">
 					<button className="header-button  button-sold">
-						Vends tes articles
+						Sell Your Clothes
 					</button>
 				</Link>
 			</div>

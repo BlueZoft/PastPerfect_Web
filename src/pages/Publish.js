@@ -2,7 +2,7 @@ import { Navigate, useNavigate } from "react-router-dom"
 import { useState } from "react"
 import axios from "axios"
 
-// on peut aussi ici récupérer le token dans les Cookies
+// We can also retrieve the token from Cookies here
 const Publish = ({ token }) => {
 	const [picture, setPicture] = useState()
 	const [title, setTitle] = useState("")
@@ -37,26 +37,25 @@ const Publish = ({ token }) => {
 				formData.append("price", price)
 
 				const response = await axios.post(
-					"https://vinted-backend-manuelf.herokuapp.com/offer/publish",
-					// "http://localhost:3001/offer/publish",
+					"http://localhost:3001/offer/publish",
 					formData,
 					{
 						headers: {
 							// authorization: "Bearer " + token
 							authorization: `Bearer ${token}`,
-							// l'espace est indispensable car côté back on récupère ça:
+							// the space is essential because on the back-end we retrieve it like this:
 							// req.headers.authorization.replace("Bearer ", "")
 						},
 					}
 				)
 				//   console.log(response.data);
 				if (response.data._id) {
-					// naviguer vers la page de l'annonce qui vient d'être créée
+					// navigate to the page of the newly created listing
 					navigate(`/offer/${response.data._id}`)
 				}
 			} else {
 				setErrorMessage(
-					"Les champs Title, Price et Picture sont obligatoires !"
+					"The Title, Price, and Picture fields are required!"
 				)
 			}
 		} catch (error) {
@@ -68,7 +67,7 @@ const Publish = ({ token }) => {
 		<form
 			style={{ padding: 0 }}
 			onSubmit={handleSubmit}
-			class="signup-form publish-form container"
+			className="signup-form publish-form container"
 		>
 			<div className="file-select">
 				{picture ? (
@@ -88,8 +87,8 @@ const Publish = ({ token }) => {
 						<div className="dashed-preview-without">
 							<div className="input-upload">
 								<label htmlFor="file" className="input-label">
-									<span class="input-sign">+</span>{" "}
-									<span>Ajouter une photo</span>
+									<span className="input-sign">+</span>{" "}
+									<span>Add a photo</span>
 								</label>
 							</div>
 							<input
@@ -110,7 +109,7 @@ const Publish = ({ token }) => {
 			<br />
 			<div className="text-input-section">
 				<div className="text-input">
-					<h4>Titre</h4>
+					<h4>Title</h4>
 					<input
 						type="text"
 						placeholder="title"
@@ -118,13 +117,13 @@ const Publish = ({ token }) => {
 					/>
 				</div>
 				<div className="text-input">
-					<h4>Décris ton article</h4>
+					<h4>Describe your item</h4>
 					<textarea
 						name=""
 						id=""
 						cols="30"
 						rows="10"
-						placeholder="ex: porté quelquefois, taille correctement"
+						placeholder="e.g., worn a few times, fits well"
 						onChange={(event) => setDescription(event.target.value)}
 					/>
 				</div>
@@ -132,17 +131,17 @@ const Publish = ({ token }) => {
 			<br />
 			<div className="text-input-section">
 				<div className="text-input">
-					<h4>Marque</h4>
+					<h4>Brand</h4>
 					<input
 						type="text"
-						placeholder="ex : Nike"
+						placeholder="e.g., Nike"
 						onChange={(event) => setBrand(event.target.value)}
 					/>
 				</div>
 
 				<br />
 				<div className="text-input">
-					<h4>Taille</h4>
+					<h4>Size</h4>
 					<input
 						type="text"
 						placeholder="size"
@@ -151,7 +150,7 @@ const Publish = ({ token }) => {
 				</div>
 				<br />
 				<div className="text-input">
-					<h4>Couleur</h4>
+					<h4>Color</h4>
 					<input
 						type="text"
 						placeholder="color"
@@ -160,7 +159,7 @@ const Publish = ({ token }) => {
 				</div>
 				<br />
 				<div className="text-input">
-					<h4>Etat</h4>
+					<h4>Condition</h4>
 					<input
 						type="text"
 						placeholder="condition"
@@ -169,7 +168,7 @@ const Publish = ({ token }) => {
 				</div>
 				<br />
 				<div className="text-input">
-					<h4>Lieu</h4>
+					<h4>Location</h4>
 					<input
 						type="text"
 						placeholder="city"
@@ -180,7 +179,7 @@ const Publish = ({ token }) => {
 			<br />
 			<div className="text-input-section">
 				<div className="text-input">
-					<h4>Prix</h4>
+					<h4>Price</h4>
 					<input
 						type="number"
 						placeholder="price"
@@ -190,7 +189,7 @@ const Publish = ({ token }) => {
 			</div>
 			<br />
 			<div className="form-button-div">
-				<button type="submit">Ajouter</button>
+				<button type="submit">Add</button>
 			</div>
 			{errorMessage}
 		</form>
