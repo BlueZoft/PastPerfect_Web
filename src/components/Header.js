@@ -1,12 +1,8 @@
 import { Link, useNavigate } from "react-router-dom"
 import { useState, useEffect } from "react"
-import { Range, getTrackBackground } from "react-range"
 import { useLocation } from "react-router-dom"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faSearch } from "@fortawesome/free-solid-svg-icons"
-
-// const pathname = true
-// const path = window.location.pathname
 
 const Header = ({
 	logo,
@@ -15,12 +11,8 @@ const Header = ({
 	title,
 	setSearch,
 	setPage,
-	handleChangeSortPrice,
-	range,
-	setRange,
-	checkInputValue,
-	// handlePageClick,
 }) => {
+
 	const navigate = useNavigate()
 	const location = useLocation()
 	const [pathName, setPathName] = useState()
@@ -38,14 +30,7 @@ const Header = ({
 	return (
 		<div className="header-container">
 			<div className="header container">
-				<Link
-					to={`/`}
-					// onClick={() => {
-					// setPage(1)
-					// setRange({ values: [0, 420] })
-					// handleChangeSortPrice(false)
-					// }}
-				>
+				<Link to={`/`}>
 					<img className="logo" src={logo} alt="" />
 				</Link>
 				{pathName === true && (
@@ -70,80 +55,9 @@ const Header = ({
 								/>
 							</div>
 						</div>
-
-						<div className="panel-edit-search-bottom">
-							<div className="checkbox-container-sort">
-								<label htmlFor="checkbox">Sort by price</label>
-								<div className="check">
-									<input
-										onChange={(event) =>
-											handleChangeSortPrice(event.target.checked)
-										}
-										type="checkbox"
-										className="check__check"
-										checked={checkInputValue}
-										value={checkInputValue}
-										id="checkbox"
-									/>
-									<div className="check__indicator" />
-								</div>
-							</div>
-							<div className="range-container">
-								<Range
-									step={1}
-									min={0}
-									max={500}
-									values={range.values}
-									onChange={(values) => {
-										setRange({ values })
-										setPage(1)
-									}}
-									renderTrack={({ props, children }) => (
-										<div
-											{...props}
-											style={{
-												...props.style,
-												height: "6px",
-												width: "100%",
-												background: getTrackBackground({
-													values: range.values,
-													colors: ["#ccc", "#018a91", "#ccc"],
-													min: 0,
-													max: 500,
-												}),
-												alignSelf: "center",
-											}}
-										>
-											{children}
-										</div>
-									)}
-									renderThumb={({ index, props, isDragged }) => (
-										<>
-											<div
-												className="container-number-range"
-												{...props}
-												style={{
-													...props.style,
-													borderRadius: "50px",
-													height: "22px",
-													width: "22px",
-													backgroundColor: "#09b1ba",
-												}}
-											>
-												<div className="number-range">
-													<output style={{ marginTop: "30px" }} id="output">
-														{range.values[index] + "Rs"}
-													</output>
-												</div>
-											</div>
-										</>
-									)}
-								/>
-							</div>
-							{/* /range-container */}
-						</div>
 					</div>
 				)}
+
 				{token ? (
 					<>
 						<button
@@ -165,7 +79,7 @@ const Header = ({
 						</Link>
 						<Link to={`/login`}>
 							<button className="header-button button-login-signup">
-								Sign In
+								Log In
 							</button>
 						</Link>
 					</>

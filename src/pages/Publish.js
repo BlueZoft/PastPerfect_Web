@@ -2,65 +2,106 @@ import { Navigate, useNavigate } from "react-router-dom"
 import { useState } from "react"
 import axios from "axios"
 
-// We can also retrieve the token from Cookies here
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+
 const Publish = ({ token }) => {
-	const [picture, setPicture] = useState()
+	const [isLoading, setIsLoading] = useState(false)
+	const [touched, setTouched] = useState({
+		title: false,
+		price: false,
+		size: false,
+		condition: false
+	})
+	const [picture, setPicture] = useState(null)
 	const [title, setTitle] = useState("")
 	const [description, setDescription] = useState("")
-	const [brand, setBrand] = useState("")
 	const [size, setSize] = useState("")
-	const [color, setColor] = useState("")
 	const [condition, setCondition] = useState("")
-	const [city, setCity] = useState("")
 	const [price, setPrice] = useState("")
-
 	const [preview, setPreview] = useState("")
-
 	const [errorMessage, setErrorMessage] = useState("")
+
+	const sizeOptions = ["XS", "S", "M", "L", "XL", "XXL"]
+	const conditionOptions = [
+		"New with tags",
+		"New without tags",
+		"Barely Used",
+		"Moderately Used",
+		"Functional",
+		"Not Fully Functional"
+	]
 
 	const navigate = useNavigate()
 
+	const validateForm = () => {
+		const errors = []
+		if (!title.trim()) errors.push("Title is required")
+		if (!price) errors.push("Price is required")
+		if (!picture) errors.push("Picture is required")
+		if (!size) errors.push("Size is required")
+		if (!condition) errors.push("Condition is required")
+		if (price && (isNaN(price) || price <= 0)) errors.push("Price must be a valid number greater than 0")
+		if (description && description.length > 500) errors.push("Description must be less than 500 characters")
+		return errors
+	}
+
+	const handleBlur = (field) => {
+		setTouched(prev => ({ ...prev, [field]: true }))
+	}
+
 	const handleSubmit = async (event) => {
+		event.preventDefault()
+		setErrorMessage("")
+		
+		const errors = validateForm()
+		if (errors.length > 0) {
+			setErrorMessage(errors.join(". "))
+			setTouched({
+				title: true,
+				price: true,
+				size: true,
+				condition: true
+			})
+			return
+		}
+
+		setIsLoading(true)
 		try {
-			event.preventDefault()
+			const formData = new FormData()
+			formData.append("picture", picture)
+			formData.append("title", title)
+			formData.append("description", description)
+			formData.append("size", size)
+			formData.append("condition", condition)
+			formData.append("price", price)
 
-			if (title && price && picture) {
-				const formData = new FormData()
-				formData.append("picture", picture)
-				formData.append("title", title)
-				formData.append("description", description)
-				formData.append("brand", brand)
-				formData.append("size", size)
-				formData.append("color", color)
-				formData.append("condition", condition)
-				formData.append("city", city)
-				formData.append("price", price)
-
-				const response = await axios.post(
-					"http://localhost:3001/offer/publish",
-					formData,
-					{
-						headers: {
-							// authorization: "Bearer " + token
-							authorization: `Bearer ${token}`,
-							// the space is essential because on the back-end we retrieve it like this:
-							// req.headers.authorization.replace("Bearer ", "")
-						},
-					}
-				)
-				//   console.log(response.data);
-				if (response.data._id) {
-					// navigate to the page of the newly created listing
-					navigate(`/offer/${response.data._id}`)
+			const response = await axios.post(
+				`${API_URL}/offer/publish`,
+				formData,
+				{
+					headers: {
+						authorization: `Bearer ${token}`,
+					},
 				}
-			} else {
-				setErrorMessage(
-					"The Title, Price, and Picture fields are required!"
-				)
+			)
+
+			if (response.data._id) {
+				navigate(`/offer/${response.data._id}`)
 			}
 		} catch (error) {
-			console.log(error.message)
+			console.error("Publish Error:", error)
+			setErrorMessage(
+				error.response?.data?.message || 
+				"An error occurred while publishing your item. Please try again."
+			)
+		} finally {
+			setIsLoading(false)
 		}
+	}
+
+	const handlePictureRemove = () => {
+		setPicture(null)  // Changed from empty string to null for better type safety
+		setPreview("")
 	}
 
 	return token ? (
@@ -72,11 +113,17 @@ const Publish = ({ token }) => {
 			<div className="file-select">
 				{picture ? (
 					<div className="dashed-preview-image">
-						<img src={preview} alt="" />
+						<img src={preview} alt="Item preview" />
 						<div
 							className="remove-img-button"
-							onClick={() => {
-								setPicture("")
+							onClick={handlePictureRemove}
+							aria-label="Remove image"
+							role="button"
+							tabIndex={0}
+							onKeyPress={(e) => {
+								if (e.key === 'Enter' || e.key === ' ') {
+									handlePictureRemove();
+								}
 							}}
 						>
 							X
@@ -95,10 +142,15 @@ const Publish = ({ token }) => {
 								style={{ display: "none" }}
 								id="file"
 								type="file"
+								accept="image/*"
 								onChange={(event) => {
-									setPicture(event.target.files[0])
-									setPreview(URL.createObjectURL(event.target.files[0]))
+									const file = event.target.files[0]
+									if (file) {
+										setPicture(file)
+										setPreview(URL.createObjectURL(file))
+									}
 								}}
+								aria-label="Upload item image"
 							/>
 						</div>
 					</div>
@@ -112,69 +164,61 @@ const Publish = ({ token }) => {
 					<h4>Title</h4>
 					<input
 						type="text"
-						placeholder="title"
-						onChange={(event) => setTitle(event.target.value)}
+						placeholder="Title"
+						value={title}
+						onChange={(e) => setTitle(e.target.value)}
+						onBlur={() => handleBlur('title')}
+						className={touched.title && !title ? 'error' : ''}
 					/>
 				</div>
 				<div className="text-input">
 					<h4>Describe your item</h4>
 					<textarea
-						name=""
-						id=""
-						cols="30"
-						rows="10"
 						placeholder="e.g., worn a few times, fits well"
-						onChange={(event) => setDescription(event.target.value)}
+						value={description}
+						onChange={(e) => setDescription(e.target.value)}
+						maxLength={500}
 					/>
+					<small>{description.length}/500 characters</small>
+
 				</div>
 			</div>
 			<br />
 			<div className="text-input-section">
 				<div className="text-input">
-					<h4>Brand</h4>
-					<input
-						type="text"
-						placeholder="e.g., Nike"
-						onChange={(event) => setBrand(event.target.value)}
-					/>
-				</div>
-
-				<br />
-				<div className="text-input">
 					<h4>Size</h4>
-					<input
-						type="text"
-						placeholder="size"
-						onChange={(event) => setSize(event.target.value)}
-					/>
-				</div>
-				<br />
-				<div className="text-input">
-					<h4>Color</h4>
-					<input
-						type="text"
-						placeholder="color"
-						onChange={(event) => setColor(event.target.value)}
-					/>
+					<select
+						value={size}
+						onChange={(e) => setSize(e.target.value)}
+						onBlur={() => handleBlur('size')}
+						className={touched.size && !size ? 'error' : ''}
+					>
+						<option value="">Select size</option>
+						{sizeOptions.map((option) => (
+							<option key={option} value={option}>
+								{option}
+							</option>
+						))}
+					</select>
 				</div>
 				<br />
 				<div className="text-input">
 					<h4>Condition</h4>
-					<input
-						type="text"
-						placeholder="condition"
-						onChange={(event) => setCondition(event.target.value)}
-					/>
+					<select
+						value={condition}
+						onChange={(e) => setCondition(e.target.value)}
+						onBlur={() => handleBlur('condition')}
+						className={touched.condition && !condition ? 'error' : ''}
+					>
+						<option value="">Select condition</option>
+						{conditionOptions.map((option) => (
+							<option key={option} value={option}>
+								{option}
+							</option>
+						))}
+					</select>
 				</div>
-				<br />
-				<div className="text-input">
-					<h4>Location</h4>
-					<input
-						type="text"
-						placeholder="city"
-						onChange={(event) => setCity(event.target.value)}
-					/>
-				</div>
+
 			</div>
 			<br />
 			<div className="text-input-section">
@@ -182,16 +226,27 @@ const Publish = ({ token }) => {
 					<h4>Price</h4>
 					<input
 						type="number"
-						placeholder="price"
-						onChange={(event) => setPrice(event.target.value)}
+						min="0"
+						step="0.01"
+						placeholder="Price"
+						value={price}
+						onChange={(e) => setPrice(e.target.value)}
+						onBlur={() => handleBlur('price')}
+						className={touched.price && !price ? 'error' : ''}
 					/>
 				</div>
 			</div>
 			<br />
 			<div className="form-button-div">
-				<button type="submit">Add</button>
+				<button type="submit" disabled={isLoading}>
+					{isLoading ? "Publishing..." : "Add"}
+				</button>
 			</div>
-			{errorMessage}
+			{errorMessage && (
+				<div className="error-message" role="alert">
+					{errorMessage}
+				</div>
+			)}
 		</form>
 	) : (
 		<Navigate to="/login" />

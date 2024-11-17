@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { sha256 } from 'crypto-js';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
@@ -10,9 +9,9 @@ const SignUp = ({ setUser }) => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [newsletter, setNewsletter] = useState(false);
   const [preview, setPreview] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -25,25 +24,13 @@ const SignUp = ({ setUser }) => {
         return;
       }
 
-      // Basic email validation
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        setErrorMessage("Please enter a valid email address.");
-        return;
-      }
-
-      // Basic password strength check
-      if (password.length < 8) {
-        setErrorMessage("Password must be at least 8 characters long.");
-        return;
-      }
+      setIsLoading(true);
 
       const formData = new FormData();
       formData.append("avatar", avatar);
       formData.append("username", username);
       formData.append("email", email);
-      formData.append("password", sha256(password).toString()); // Hash password
-      formData.append("newsletter", newsletter);
+      formData.append("password", password); // Send plain password
 
       const response = await axios.post(
         `${API_URL}/user/signup`,
@@ -59,26 +46,21 @@ const SignUp = ({ setUser }) => {
         setUser(response.data.token, response.data._id);
         navigate("/");
       } else {
-        setErrorMessage("An error occurred during registration.");
+        setErrorMessage("Sign up failed");
       }
     } catch (error) {
-      console.error("Signup Error:", error);
-
-      if (error.response) {
-        switch (error.response.status) {
-          case 409:
-            setErrorMessage("This email is already associated with an account.");
-            break;
-          case 400:
-            setErrorMessage("Invalid registration data.");
-            break;
-          default:
-            setErrorMessage("An error occurred. Please try again later.");
-        }
-      } else {
-        setErrorMessage("Unable to connect to the server. Please check your connection.");
-      }
+      console.log(error.message);
+      console.log(error.response);
+      setErrorMessage("An error occurred during sign up");
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  const handleAvatarChange = (event) => {
+    const file = event.target.files[0];
+    setAvatar(file);
+    setPreview(URL.createObjectURL(file));
   };
 
   return (
@@ -86,83 +68,40 @@ const SignUp = ({ setUser }) => {
       <h2>Sign Up</h2>
       <form onSubmit={handleSubmit} className="signup-form">
         <input
-          value={username}
-          type="text"
-          placeholder="Username"
-          onChange={(event) => setUsername(event.target.value)}
-        />
-        <br />
-
-        <input
-          value={email}
           type="email"
           placeholder="Email"
           onChange={(event) => setEmail(event.target.value)}
+          aria-label="Email"
+        />
+        <br />
+        <input
+          type="text"
+          placeholder="Username"
+          onChange={(event) => setUsername(event.target.value)}
+          aria-label="Username"
         />
         <br />
         <input
           type="password"
           placeholder="Password"
           onChange={(event) => setPassword(event.target.value)}
+          aria-label="Password"
         />
         <br />
-        {/* UPLOAD IMAGE */}
-        <div className="file-select">
-          {avatar ? (
-            <div className="dashed-preview-image">
-              <img src={preview} alt="Avatar preview" />
-              <div
-                className="remove-img-button"
-                onClick={() => {
-                  setAvatar("");
-                  setPreview("");
-                }}
-              >
-                X
-              </div>
-            </div>
-          ) : (
-            <div>
-              <div className="dashed-preview-without">
-                <div className="input-upload">
-                  <label htmlFor="file" className="input-label">
-                    <span className="input-sign">+</span>{" "}
-                    <span>Add a photo</span>
-                  </label>
-                </div>
-                <input
-                  style={{ display: "none" }}
-                  id="file"
-                  type="file"
-                  onChange={(event) => {
-                    setAvatar(event.target.files[0]);
-                    setPreview(URL.createObjectURL(event.target.files[0]));
-                  }}
-                />
-              </div>
-            </div>
-          )}
-        </div>
-        {/* END UPLOAD IMAGE */}
+        <input
+          type="file"
+          onChange={handleAvatarChange}
+          aria-label="Avatar"
+        />
+        {preview && <img src={preview} alt="Avatar Preview" />}
         <br />
-        <div className="checkbox-container">
-          <div>
-            <input
-              type="checkbox"
-              onChange={(event) => setNewsletter(event.target.checked)}
-            />
-            <span>Subscribe to our newsletter</span>
-          </div>
-          <p>
-            By signing up, I confirm that I have read and accepted the Terms &
-            Conditions and Privacy Policy. I confirm that I am at least 18 years old.
-          </p>
-        </div>
+        <button type="submit" disabled={isLoading}>
+          {isLoading ? "Signing Up..." : "Sign Up"}
+        </button>
         <br />
-        <button type="submit">Sign Up</button>
         <span>{errorMessage}</span>
       </form>
-      <Link to={`/login`}>Already have an account? Log in!</Link>
+      <Link to={`/login`}>Already have an account? Login!</Link>
     </div>
   );
 };

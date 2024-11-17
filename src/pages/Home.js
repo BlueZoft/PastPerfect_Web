@@ -53,7 +53,7 @@ const Home = ({ title, setPage, page, sortedPrice, range }) => {
 		<>
 			<Hero HeroImg={HeroImg} decoHero={decoHero} />
 			<div className=" container">
-				<h1 className="offers-title">Liste des Annonces :</h1>
+				<h1 className="offers-title">Suggestions for you :</h1>
 				<div className="offers">
 					{data.offers.map((offer) => {
 						return (
